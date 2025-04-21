@@ -22,6 +22,8 @@ from models import (
 
 # --- App Configuration -------------------------------------------------------
 from urllib.parse import quote_plus  # NEW – to URL‑encode the ODBC connection string
+    
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
@@ -36,14 +38,11 @@ DATA_TYPE_MODELS = {
 if "DATABASE_URL" in os.environ:
     app.config["SQLALCHEMY_DATABASE_URI"] = os.environ["DATABASE_URL"]
 else:
-    DRIVER = "ODBC Driver 18 for SQL Server"  # or 18, 11, etc.
-
-    USER = os.getenv("DB_USER", "usr_EnergyTrack")  # "
-    PASS = os.getenv("DB_PASSWORD", "Z4YH5MfDhNFIVoOcWxeV")
-    SERVER = os.getenv(
-        "DB_SERVER", "192.168.200.210"
-    )  # "hostname,1433" if a custom port
-    DBNAME = os.getenv("DB_NAME", "InfoMercado")
+    DRIVER = os.getenv("DB_DRIVER")  # "ODBC Driver 1X for SQL Server"
+    USER   = os.getenv("DB_USERNAME")  # "
+    PASS   = os.getenv("DB_PASSWORD")
+    SERVER = os.getenv("DB_SERVER")   # "hostname,1433" if a custom port
+    DBNAME = os.getenv("DB_DATABASE")
 
     odbc_str = (
         f"DRIVER={{{DRIVER}}};"
@@ -53,6 +52,15 @@ else:
         "Encrypt=yes;"  # keep traffic encrypted
         "TrustServerCertificate=yes;"  # <<< added (skip cert validation) *
     )
+    if USER is None or PASS is None:
+        app.logger.error(
+            "Database credentials (DB_USER, DB_PASSWORD) are not set in environment variables."
+        )
+        print(USER, PASS)
+        raise ValueError(
+            "Database credentials (DB_USER, DB_PASSWORD) are not set in environment variables."
+        )
+
     params = quote_plus(odbc_str)
     app.config["SQLALCHEMY_DATABASE_URI"] = f"mssql+pyodbc:///?odbc_connect={params}"
 
@@ -512,5 +520,4 @@ def submit_generic_batch_insert_only(data_type):
 if __name__ == "__main__":
     # When running directly, make sure logging is set up before app.run
     # (basicConfig call above handles this for simple cases)
-    load_dotenv()
     app.run(debug=True, host="0.0.0.0", port=5001)
