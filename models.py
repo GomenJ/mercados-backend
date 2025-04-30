@@ -93,35 +93,7 @@ class BasePnxRecord(db.Model):
     Energia = db.Column(db.Numeric(10, 2), nullable=True)
     Congestion = db.Column(db.Numeric(10, 2), nullable=True)
     Perdidas = db.Column(db.Numeric(10, 2), nullable=True)
-
-    # --- Common Timestamps ---
-    # Use @declared_attr for columns that might depend on the subclass or need defaults
-    # @declared_attr
-    # def FechaCreacion(cls):
-    #     return db.Column(
-    #         db.DateTime(timezone=True), server_default=func.now(), nullable=False
-    #     )
-    #
-    # @declared_attr
-    # def FechaModificacion(cls):
-    #     return db.Column(
-    #         db.DateTime(timezone=True),
-    #         server_default=func.now(),
-    #         onupdate=func.now(),
-    #         nullable=False,
-    #     )
-
-    # Define the Unique Constraint structure once, name will be set in subclasses
-    # @declared_attr
-    # def __table_args__(cls):
-    #     # Generate a unique constraint name based on the table name
-    #     constraint_name = f"uq_{cls.__tablename__}_record"
-    #     return (
-    #         UniqueConstraint("Sistema", "Fecha", "Hora", "Clave", name=constraint_name),
-    #     )
-
-    # --- Common Methods ---
-    # These methods are inherited by all subclasses
+    
     def __init__(self, **kwargs):
         # Standard way to handle keyword args in SQLAlchemy models
         super().__init__(**kwargs)
@@ -160,42 +132,17 @@ class BasePnxRecord(db.Model):
         self.Energia = self._to_decimal_or_none(data_dict.get("Energia"))
         self.Congestion = self._to_decimal_or_none(data_dict.get("Congestion"))
         self.Perdidas = self._to_decimal_or_none(data_dict.get("Perdidas"))
-        # Add other updatable fields if necessary
-
 
 # --- Concrete Model Classes (Minimal Definitions) ---
-
-
 class PndMdaRecord(BasePnxRecord):
-    # __tablename__ = "pnd_mda"
     __tablename__ = "PNDMDA"
-    # __table_args__ are inherited and name is generated automatically
-    # __table_args__ = (
-    #     UniqueConstraint("Sistema", "Fecha", "Hora", "Clave", name="uq_pnd_mda_record"),
-    #     # Add other table-specific args like indexes here if needed
-    # )
 
 
 class PmlMdaRecord(BasePnxRecord):
-    # __tablename__ = "pml_mda"
     __tablename__ = "PMLMDA"
-    # __table_args__ are inherited
-    # __table_args__ = (
-    #     UniqueConstraint("Sistema", "Fecha", "Hora", "Clave", name="uq_pml_mda_record"),
-    # )
-
 
 class PmlMtrRecord(BasePnxRecord):
-    # __tablename__ = "pml_mtr"
     __tablename__ = "PMLMTR"
-    # __table_args__ are inherited
-    # __table_args__ = (
-    #     UniqueConstraint("Sistema", "Fecha", "Hora", "Clave", name="uq_pml_mtr_record"),
-    # )
-
 
 class PndMtrRecord(BasePnxRecord):
-    # __tablename__ = "pnd_mtr"
     __tablename__ = "PNDMTR"
-    # __table_args__ are inherited
-    # __table_args__ = ()

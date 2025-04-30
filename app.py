@@ -299,13 +299,7 @@ def check_data_existence(data_type, fecha):
             }
         ), 400
 
-    # 3. Perform Database Query
     try:
-        # Use an efficient query like EXISTS or query().limit(1).count() > 0
-        # query().exists().scalar() is often efficient
-        # exists = db.session.query(
-        #     ModelClass.query.filter_by(Fecha=parsed_date).exists()
-        # ).scalar()
         result = (
             db.session.query(ModelClass.Sistema)
             .filter_by(Fecha=parsed_date)
@@ -432,6 +426,7 @@ def submit_generic_batch_insert_only(data_type):
                 "Congestion": record_dict.get("Congestion"),
                 "Perdidas": record_dict.get("Perdidas"),
             }
+
             # Check constraints again after conversion
             if not (0 <= validated_data["Hora"] <= 24):
                 raise ValueError("Invalid Hora range")
