@@ -107,7 +107,8 @@ class CapacidadTransferenciaSchema(SQLAlchemyAutoSchema):
     )
     Horario = fields.Integer(
         required=True,
-        validate=validate.Range(min=0, max=23), # Assuming 0-23 hour range
+        # validate=validate.Range(min=0, max=23), # Assuming 0-23 hour range
+        validate=validate.Range(min=1, max=24), # Assuming 1-24 hour range
         allow_none=False # Explicitly disallow null
     )
 

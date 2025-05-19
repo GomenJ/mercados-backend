@@ -31,7 +31,7 @@ def create_app(config_name=None):
     app.config.from_object(config_by_name[config_name])
 
     # --- Initialize Extensions with App ---
-    db.init_app(app)
+    db.init_app(app) # Optional timeout for DB connections
     ma.init_app(app)
     cors.init_app(app) # Apply CORS globally or configure specific resources
     # migrate.init_app(app, db) # Uncomment if using migrations

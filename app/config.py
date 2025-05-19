@@ -21,6 +21,10 @@ class Config:
     DB_NAME = os.getenv("DB_DATABASE")
 
     # Construct SQLAlchemy Database URI
+    SQLALCHEMY_ENGINE_OPTIONS = {
+    'fast_executemany': True,
+    'use_setinputsizes': False  # This is often recommended alongside fast_executemany for performance
+    }
     if "DATABASE_URL" in os.environ:
         SQLALCHEMY_DATABASE_URI = os.environ["DATABASE_URL"]
     elif DB_DRIVER and DB_USER and DB_PASS and DB_SERVER and DB_NAME:
@@ -41,6 +45,7 @@ class Config:
         SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
         # Alternatively, raise an error:
         # raise ValueError("Database configuration variables missing in environment.")
+    
 
 
 class DevelopmentConfig(Config):
