@@ -1,75 +1,58 @@
-import os
-import logging
-from flask import Flask, jsonify
+# app/__init__.py
+from flask import Flask, jsonify, send_from_directory, request
 from flask_sqlalchemy import SQLAlchemy
-from flask_marshmallow import Marshmallow
-from flask_restful import Api
 from flask_cors import CORS
+import logging
+import os
+from config import app_config # Import from config.py at the root
 # from flask_migrate import Migrate # Uncomment if using migrations
 
 # Import configurations and error handlers
-from .config import config_by_name
-from .errors import error_handlers
-
-# Instantiate extensions (without app object initially)
 db = SQLAlchemy()
-ma = Marshmallow()
 cors = CORS()
-# migrate = Migrate() # Uncomment if using migrations
-
-# Import models here AFTER db is instantiated, so they correctly inherit from db.Model
-# This also helps Flask-Migrate detect models.
-from . import models # noqa
-
 
 def create_app(config_name=None):
     """Application Factory Function"""
     if config_name is None:
         config_name = os.getenv('FLASK_ENV', 'default')
 
-    app = Flask(__name__)
-    app.config.from_object(config_by_name[config_name])
+    app = Flask(__name__, static_folder='static', static_url_path='') # Serve from app/static
+
+    # Load configuration
+    app.config.from_object(app_config[config_name])
+
+    # Configure logging
+    logging.basicConfig(level=getattr(logging, app.config['LOGGING_LEVEL'], logging.INFO))
+    if app.debug or app.testing:
+        app.logger.setLevel(logging.DEBUG)
+    else:
+        app.logger.setLevel(logging.INFO)
+    app.logger.info(f"Application starting with '{config_name}' configuration.")
+
+    if not app.config.get('SQLALCHEMY_DATABASE_URI'):
+        app.logger.error("FATAL ERROR: SQLALCHEMY_DATABASE_URI is not set. Application cannot start.")
+        # In a real app, you might raise an exception or exit
+        # For now, we'll let it potentially fail later during db init if not set.
+        # raise RuntimeError("SQLALCHEMY_DATABASE_URI is not set.")
 
     # --- Initialize Extensions with App ---
     db.init_app(app) # Optional timeout for DB connections
-    ma.init_app(app)
     cors.init_app(app) # Apply CORS globally or configure specific resources
     # migrate.init_app(app, db) # Uncomment if using migrations
 
     # Initialize Flask-RESTful AFTER app creation and config loading
     # Pass custom error handling to Api constructor if desired
-    api = Api(app)
 
-    # --- Setup Logging ---
-    log_level = app.config.get("LOG_LEVEL", "INFO").upper()
-    logging.basicConfig(
-        filename="mercado.log", # Consider rotating file handlers for production
-        level=log_level,
-        format='%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s' # Example format
-    )
-    app.logger.info(f"App created with config: {config_name}")
-    app.logger.info(f"Database URI: {app.config.get('SQLALCHEMY_DATABASE_URI')}") # Be careful logging URIs with passwords
+    # Register Blueprints
+    from .api.health_check import health_check_bp
+    from .api.v1.generic_mda_mtr import generic_mda_mtr_bp
+    from .api.v1.capacidad_transferencia import capacidad_transferencia_bp
+    from .api.v1.demand import demanda_bp
 
-    # --- Register Error Handlers ---
-    for exc_or_code, handler in error_handlers.items():
-        app.register_error_handler(exc_or_code, handler)
-
-    # --- Import and Register Routes/Resources ---
-    from .resources.routes import initialize_routes
-    initialize_routes(api) # Pass the api instance to the route initializer
-
-    # --- Database Creation (Run once or use migrations) ---
-    with app.app_context():
-        app.logger.info("Checking/Creating database tables if they don't exist...")
-        try:
-             # Use db.create_all() for initial setup or simple cases.
-             # For production and schema changes, Flask-Migrate is recommended.
-             db.create_all()
-             app.logger.info("Database tables checked/created successfully.")
-        except Exception as e:
-            app.logger.exception(f"CRITICAL ERROR: Failed to create/check database tables: {e}")
-
-
+    app.register_blueprint(health_check_bp, url_prefix='/api/health_check')
+    app.register_blueprint(generic_mda_mtr_bp, url_prefix='/api/v1/mda_mtr')
+    app.register_blueprint(capacidad_transferencia_bp, url_prefix='/api/v1/capacidad_transferencia')
+    app.register_blueprint(demanda_bp, url_prefix='/api/v1/demanda')
 
     # --- Basic Root Route (Optional - Can be removed if only API) ---
     @app.route("/")
