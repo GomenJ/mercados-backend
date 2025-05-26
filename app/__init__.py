@@ -22,7 +22,10 @@ def create_app(config_name=None):
     app.config.from_object(app_config[config_name])
 
     # Configure logging
-    logging.basicConfig(level=getattr(logging, app.config['LOGGING_LEVEL'], logging.INFO))
+    logging.basicConfig(filename="./mercado.log", filemode='a', 
+        format="%(asctime)s - %(levelname)s - %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+        level=getattr(logging, app.config['LOGGING_LEVEL'], logging.INFO))
     if app.debug or app.testing:
         app.logger.setLevel(logging.DEBUG)
     else:
