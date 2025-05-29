@@ -9,9 +9,8 @@ from ...models.pml_pnd_records import (
     PndMtrRecord,
 )
 
-# from ...services.pnd_mda_service import (  # Import the service function
-#     get_daily_pml_average_latest_date,
-# )
+# Import the new service function
+from ...services.pml_aggregation_service import get_pml_aggregates_for_comparison_dates
 
 from ...services.pnd_mda_service import (  # Import the new service function
  get_daily_average_pnd_by_clave_split_years,
@@ -312,3 +311,31 @@ def get_daily_average_pml():
  f"Error fetching daily average PML by Clave: {e}"
  )
     return jsonify({"status": "error", "message": "Failed to fetch daily average PML."}), 500
+
+# --- NEW Endpoint for PML Aggregation Comparison ---
+@generic_mda_mtr_bp.route("/pml_comparison_data", methods=["GET"])
+def get_pml_comparison_data():
+    """
+    Retrieves aggregated PML data for the latest date and one week prior,
+    structured for comparison.
+    """
+    try:
+        current_app.logger.info("Received request for PML comparison data.")
+        aggregated_data = get_pml_aggregates_for_comparison_dates()
+
+        # Transform the data structure for the final API response
+        response_data = {
+            "latestDayData": aggregated_data.get("latest_day_records", []),
+            "previousWeekDayData": aggregated_data.get("previous_week_day_records", []),
+            "latestDate": aggregated_data.get("latest_date"), # Include the actual dates
+            "previousWeekDate": aggregated_data.get("previous_week_date")
+        }
+
+        current_app.logger.info("Successfully fetched and structured PML comparison data.")
+        return jsonify(response_data), 200
+
+    except Exception as e:
+        current_app.logger.exception(
+            f"Error fetching PML comparison data: {e}"
+        )
+        return jsonify({"status": "error", "message": "Failed to fetch PML comparison data."}), 500
