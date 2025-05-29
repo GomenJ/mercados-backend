@@ -27,6 +27,11 @@ class Config:
         else:
             # Handle error or set a default if necessary, though app creation might fail
             print("Warning: Database connection details not fully configured via individual env vars.")
+   # --- SQLAlchemy Connection Pooling Settings ---
+    SQLALCHEMY_POOL_SIZE = int(os.getenv("SQLALCHEMY_POOL_SIZE", 10)) # Default to 10 connections
+    SQLALCHEMY_POOL_TIMEOUT = int(os.getenv("SQLALCHEMY_POOL_TIMEOUT", 20)) # Default timeout of 20 seconds
+    SQLALCHEMY_POOL_RECYCLE = int(os.getenv("SQLALCHEMY_POOL_RECYCLE", 3600)) # Recycle connections every hour
+    SQLALCHEMY_MAX_OVERFLOW = int(os.getenv("SQLALCHEMY_MAX_OVERFLOW", 5)) # Allow up to 5 connections beyond pool size
 
 
 class DevelopmentConfig(Config):
@@ -38,6 +43,8 @@ class ProductionConfig(Config):
     # Production specific settings
     # For example, if you need to enforce SSL for DB connection:
     # SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL_PROD')
+    SQLALCHEMY_POOL_SIZE = int(os.getenv("SQLALCHEMY_POOL_SIZE_PROD", 20))
+    SQLALCHEMY_MAX_OVERFLOW = int(os.getenv("SQLALCHEMY_MAX_OVERFLOW_PROD", 10))
     pass
 
 # Dictionary to access config by name

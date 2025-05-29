@@ -6,6 +6,27 @@ from ... import db
 
 demanda_bp = Blueprint('demanda', __name__)
 
+@demanda_bp.route("/current_day", methods=["GET"])
+def get_current_day_demand():
+    """
+    Retrieves demand data for the current day.
+    """
+    try:
+        today = date.today()
+        current_app.logger.info(f"Attempting to retrieve demand data for date: {today}")
+
+        demand_records = DemandRecord.query.filter_by(FechaOperacion=today).all()
+
+        # Convert records to a list of dictionaries
+        demand_data = [record.to_dict() for record in demand_records]
+
+        current_app.logger.info(f"Retrieved {len(demand_data)} records for {today}")
+        return jsonify(demand_data), 200
+
+    except Exception as e:
+        current_app.logger.exception(f"Error retrieving demand data for current day: {e}")
+        return jsonify({"status": "error", "message": "Failed to retrieve demand data."}), 500
+
 @demanda_bp.route("", methods=["POST"])
 def submit_data_single():
     """

@@ -69,3 +69,20 @@ class DemandRecord(db.Model):
         if self.Enlace != data_dict.get("Enlace"):
             return True
         return False
+
+# --- NEW to_dict() method ---
+    def to_dict(self) -> Dict[str, Any]:
+        """Converts the SQLAlchemy model instance to a dictionary."""
+        return {
+            "id": self.id,
+            "FechaOperacion": self.FechaOperacion.isoformat() if self.FechaOperacion else None,
+            "HoraOperacion": self.HoraOperacion,
+            "Gerencia": self.Gerencia,
+            "Demanda": self.Demanda,
+            "Generacion": self.Generacion,
+            "Pronostico": self.Pronostico,
+            "Enlace": self.Enlace,
+            "Sistema": self.Sistema,
+            "FechaCreacion": self.FechaCreacion.isoformat() if self.FechaCreacion else None,
+            "FechaModificacion": self.FechaModificacion.isoformat() if self.FechaModificacion else None,
+        }
