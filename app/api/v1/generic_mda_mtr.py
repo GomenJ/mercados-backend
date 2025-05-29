@@ -1,13 +1,20 @@
 from flask import Blueprint, request, jsonify, current_app
 from datetime import datetime, date
 from decimal import InvalidOperation
-
 from ... import db
 from ...models.pml_pnd_records import (
     PndMdaRecord,
     PmlMdaRecord,
     PmlMtrRecord,
     PndMtrRecord,
+)
+
+# from ...services.pnd_mda_service import (  # Import the service function
+#     get_daily_pml_average_latest_date,
+# )
+
+from ...services.pnd_mda_service import (  # Import the new service function
+ get_daily_average_pnd_by_clave_split_years,
 )
 
 DATA_TYPE_MODELS = {
@@ -267,3 +274,41 @@ def submit_generic_batch_insert_only(data_type):
         "errors": record_errors,
     }
     return jsonify(response_body), http_code
+
+# --- NEW: Endpoint to get daily PML average for default claves and latest date ---
+# @generic_mda_mtr_bp.route("/daily_pml_average_latest", methods=["GET"])
+# def get_daily_pml_average_latest():
+#     """
+#     Gets the daily average PML for predefined claves for the current year
+#     and previous year up to the latest date in the database.
+#     """
+#     current_app.logger.info("Received request for latest daily PML average.")
+#     try:
+#         results = get_daily_pml_average_latest_date()
+#         current_app.logger.info(f"Successfully retrieved {len(results)} daily average records.")
+#         return jsonify(results), 200
+#     except Exception as e:
+#         current_app.logger.exception(
+#             f"Error retrieving latest daily PML average: {e}"
+#         )
+#         return jsonify({"status": "error", "message": str(e)}), 500
+# --- NEW: Endpoint to get daily average PML for specific Claves ---
+@generic_mda_mtr_bp.route("/daily_average_pnd", methods=["GET"])
+def get_daily_average_pml():
+    """
+    Retrieves the daily average PML for specific 'Clave' values across two date ranges:
+    current year up to latest date, and previous year up to the same latest date.
+    """
+    try:
+        current_app.logger.info(
+ "Received request for daily average PML by Clave."
+ )
+        daily_averages = get_daily_average_pnd_by_clave_split_years()
+        current_app.logger.info(f"Successfully fetched {len(daily_averages)} daily average PML records.")
+        return jsonify(daily_averages), 200
+
+    except Exception as e:
+        current_app.logger.exception(
+ f"Error fetching daily average PML by Clave: {e}"
+ )
+    return jsonify({"status": "error", "message": "Failed to fetch daily average PML."}), 500

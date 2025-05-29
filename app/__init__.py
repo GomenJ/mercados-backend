@@ -40,6 +40,7 @@ def create_app(config_name=None):
 
     # --- Initialize Extensions with App ---
     db.init_app(app) # Optional timeout for DB connections
+    # cors.init_app(app, resources={r"/*": {"origins": "*"}}) # Configure CORS to allow all origins
     cors.init_app(app) # Apply CORS globally or configure specific resources
     # migrate.init_app(app, db) # Uncomment if using migrations
 
