@@ -52,11 +52,15 @@ def create_app(config_name=None):
     from .api.v1.generic_mda_mtr import generic_mda_mtr_bp
     from .api.v1.capacidad_transferencia import capacidad_transferencia_bp
     from .api.v1.demand import demanda_bp
+    from .api.v1.demanda_real_balance import demanda_real_balance_bp
+    from .api.v1.mediciones import mediciones_bp
 
     app.register_blueprint(health_check_bp, url_prefix='/api/health_check')
     app.register_blueprint(generic_mda_mtr_bp, url_prefix='/api/v1/mda_mtr')
     app.register_blueprint(capacidad_transferencia_bp, url_prefix='/api/v1/capacidad_transferencia')
     app.register_blueprint(demanda_bp, url_prefix='/api/v1/demanda')
+    app.register_blueprint(mediciones_bp, url_prefix='/api/v1/mediciones')
+    app.register_blueprint(demanda_real_balance_bp, url_prefix='/api/v1/demanda_real_balance')
 
     # --- Basic Root Route (Optional - Can be removed if only API) ---
     @app.route("/")

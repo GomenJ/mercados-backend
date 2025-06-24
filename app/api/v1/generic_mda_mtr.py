@@ -10,7 +10,9 @@ from ...models.pml_pnd_records import (
 )
 
 # Import the new service function
-from ...services.pml_aggregation_service import get_pml_aggregates_for_comparison_dates
+from ...services.pml_aggregation_service import (get_pml_aggregates_for_comparison_dates,
+                                                 get_yearly_pml_comparison_data
+                                                 )
 
 from ...services.pnd_mda_service import (  # Import the new service function
  get_daily_average_pnd_by_clave_split_years,
@@ -312,7 +314,6 @@ def get_daily_average_pml():
  )
     return jsonify({"status": "error", "message": "Failed to fetch daily average PML."}), 500
 
-# --- NEW Endpoint for PML Aggregation Comparison ---
 @generic_mda_mtr_bp.route("/pml_comparison_data", methods=["GET"])
 def get_pml_comparison_data():
     """
@@ -339,3 +340,23 @@ def get_pml_comparison_data():
             f"Error fetching PML comparison data: {e}"
         )
         return jsonify({"status": "error", "message": "Failed to fetch PML comparison data."}), 500
+
+# --- NEW Endpoint for Yearly PML Comparison ---
+@generic_mda_mtr_bp.route("/pml_yearly_comparison_data", methods=["GET"])
+def pml_yearly_comparison_data():
+    """
+    Retrieves daily average PML data for the current year-to-date and the
+    equivalent period in the previous year for all relevant Gerencias.
+    """
+    try:
+        current_app.logger.info("Received request for yearly PML comparison data.")
+        yearly_comparison_data = get_yearly_pml_comparison_data()
+
+        current_app.logger.info("Successfully fetched yearly PML comparison data.")
+        return jsonify(yearly_comparison_data), 200
+
+    except Exception as e:
+        current_app.logger.exception(
+            f"Error fetching yearly PML comparison data: {e}"
+        )
+        return jsonify({"status": "error", "message": "Failed to fetch yearly PML comparison data."}), 500
