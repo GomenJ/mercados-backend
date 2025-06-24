@@ -54,6 +54,7 @@ def create_app(config_name=None):
     from .api.v1.demand import demanda_bp
     from .api.v1.demanda_real_balance import demanda_real_balance_bp
     from .api.v1.mediciones import mediciones_bp
+    from .api.v1.import_export_liq import import_export_liq_bp
 
     app.register_blueprint(health_check_bp, url_prefix='/api/health_check')
     app.register_blueprint(generic_mda_mtr_bp, url_prefix='/api/v1/mda_mtr')
@@ -61,6 +62,7 @@ def create_app(config_name=None):
     app.register_blueprint(demanda_bp, url_prefix='/api/v1/demanda')
     app.register_blueprint(mediciones_bp, url_prefix='/api/v1/mediciones')
     app.register_blueprint(demanda_real_balance_bp, url_prefix='/api/v1/demanda_real_balance')
+    app.register_blueprint(import_export_liq_bp, url_prefix='/api/v1/import_export_liq')
 
     # --- Basic Root Route (Optional - Can be removed if only API) ---
     @app.route("/")
